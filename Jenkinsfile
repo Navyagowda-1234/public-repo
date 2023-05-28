@@ -1,55 +1,35 @@
 pipeline {
-    agent any 
-    tools {
-        maven "3.0.5"
+  agent any
+  
+  stages {
+    stage('Build') {
+      steps {
+        // Checkout source code from repository
+        git 'https://github.com/Navyagowda-1234/public-repo'
+        
+        // Build Docker image
+        sh 'docker build -t webapp.'
+      }
+    }
     
+    stage('Push to Registry') {
+      steps {
+        // Log in to container registry
+        withDockerRegistry([credentialsId: 'navyagowda123', variable: 'Navya@123']) {
+          // Push Docker image to registry
+          sh 'docker push ec2-user/webapp'
+        }
+      }
     }
-    stages {
-        stage('Compile and Clean') { 
-            steps {
-                // Run Maven on a Unix agent.
-              
-                sh "mvn clean compile"
-            }
+    
+    stage('Deploy') {
+      steps {
+        // Connect to EC2 instance
+        sshagent(['aws1']) {
+          // Deploy Docker image on EC2
+          sh 'ssh ec2-user@ec2-13-250-107-193.ap-southeast-1.compute.amazonaws.com "docker run -d ec2-user/webapp"'
         }
-        stage('deploy') { 
-            
-            steps {
-                sh "mvn package"
-            }
-        }
-        stage('Build Docker image'){
-          
-            steps {
-                echo "Hello"
-                sh 'ls'
-                sh 'docker build -t  webapplication:${BUILD_NUMBER} .'
-            }
-        }
-        stage('Docker Login'){
-            
-            steps {
-                 withCredentials([string(credentialsId: 'navyagowda123', variable: 'Navya@123')]) {
-                    sh "docker login -u navyagowda123 -p ${Dockerpwd}"
-                }
-            }                
-        }
-        stage('Docker Push'){
-            steps {
-                sh 'docker push webapplication:${BUILD_NUMBER}'
-            }
-        }
-        stage('Docker deploy'){
-            steps {
-               
-                sh 'docker run -itd -p  8081:8080 webapplication:${BUILD_NUMBER}'
-            }
-        }
-        stage('Archving') { 
-            steps {
-                 archiveArtifacts '**/target/*.jar'
-            }
-        }
+      }
     }
+  }
 }
-
