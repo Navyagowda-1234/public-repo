@@ -5,12 +5,12 @@ pipeline {
     stage('Build Docker image') {
       steps {
         // Checkout source code from repository
-        git 'https://github.com/Navyagowda-1234/public-repo/
+        git 'https://github.com/Navyagowda-1234/public-repo.git'
       }
     }
     stage("building Docker image"){
       step{
-          sh docker build --name webapp:1.0 .
+          sh 'docker build --name webapp:1.0 .'
 	}
     }
     
