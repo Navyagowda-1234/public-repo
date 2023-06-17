@@ -10,7 +10,7 @@ pipeline {
     }
     stage("building Docker image"){
       steps{
-          sh 'docker build --name webapp:1.0 .'
+          sh 'docker build -t webapp:1.0 .'
 	}
     }
     
